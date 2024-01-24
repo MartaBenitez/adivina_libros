@@ -1,0 +1,11 @@
+<div id="sentence">
+    {{sentence}}
+</div>
+<div>
+    <form hx-post="/user-response" hx-trigger="submit" hx-target="#results-box">
+        <label for="response">Respuesta</label>
+        <input type="text" id="response" name="response">
+        <button type="submit">Enviar</button>
+    </form>
+    <div id="results-box"></div>
+</div>

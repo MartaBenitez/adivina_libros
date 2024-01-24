@@ -2,7 +2,7 @@
 from fastapi.responses import HTMLResponse
 import typer
 import uvicorn
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Form
 from fastapi.templating import Jinja2Templates
 
 from adapters.sentences_repository import InMemorySentencesRepository
@@ -17,7 +17,6 @@ templates = Jinja2Templates(directory="templates")
 def init(request: Request):
     context = {
         "request": request,
-        "sentence": ""
     }
     return templates.TemplateResponse("index.html", context)
 
@@ -28,11 +27,19 @@ def sentence(request: Request):
         "request": request,
         "sentence": respuesta.sentence
     }
-    return templates.TemplateResponse("index.html", context)
-
-@app.post("/user-response")
-def response(rsp: str) -> bool:
-    return repository.check_response(rsp)
+    return templates.TemplateResponse("game.html", context)
+    
+@app.post("/user-response", response_class=HTMLResponse)
+def response(request: Request, response: str = Form(...)):
+    resultado_bool=repository.check_response(response)
+    mensaje="Incorrecto"
+    if resultado_bool:
+        mensaje="Correcto"
+    context = {
+        "request": request,
+        "result": mensaje
+    }
+    return templates.TemplateResponse("result.html", context)
 
 def run_server() -> None:
     uvicorn.run(
