@@ -1,9 +1,13 @@
 {
     "available":[
-        "lord of the rings",
+        "the lord of the rings",
         "pride and prejudice",
         "harry potter and the philosopher's stone",
-        "the hobbit"
+        "the hobbit",
+        "alice's adventures in wonderland",
+        "treasure island",
+        "the wonderful wizard of oz",
+        "and then there were none"
     ],
     "used":[
     ]

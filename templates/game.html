@@ -4,7 +4,9 @@
 <div>
     <form hx-post="/user-response" hx-trigger="submit" hx-target="#results-box">
         <label for="response">Respuesta</label>
-        <input type="text" id="response" name="response">
+        <input list="suggestions" id="response" name="response" hx-post="/search-title" 
+            hx-trigger="input changed delay:1s" hx-target="#suggestions_box">
+        <div id="suggestions_box"></div>
         <button type="submit">Enviar</button>
     </form>
     <div id="results-box"></div>

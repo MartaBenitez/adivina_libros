@@ -41,6 +41,15 @@ def response(request: Request, response: str = Form(...)):
     }
     return templates.TemplateResponse("result.html", context)
 
+@app.post("/search-title", response_class=HTMLResponse)
+def search(request: Request, response: str = Form(...)):
+    sugerencias=repository.search_title(response)
+    context = {
+        "request": request,
+        "suggestions": sugerencias
+    }
+    return templates.TemplateResponse("suggestions.html", context)
+
 def run_server() -> None:
     uvicorn.run(
         app,
