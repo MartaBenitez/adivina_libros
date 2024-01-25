@@ -1,11 +1,13 @@
 from typing import List
 import json
 import random
+import os
 from urllib.request import urlopen
 
 from domain.book_titles import BookTitles
 from domain.daily_sentence import DailySentence
 
+url_api=os.environ.get("URL_OPENLIBRARY_API")
 
 class InMemorySentencesRepository():
     def __init__(self):
@@ -14,7 +16,7 @@ class InMemorySentencesRepository():
 
     def get_sentence(self) -> DailySentence:
         disponibles = self.get_titles_available()
-        index = random.randint(0, len(disponibles)-1)
+        index = random.choice(range(len(disponibles)))
         titulo = disponibles[index]
         info=self.get_book_info(titulo)
         self.title=titulo
@@ -36,7 +38,7 @@ class InMemorySentencesRepository():
     
     def get_book_info(self, title) -> DailySentence:
         param=title.replace(" ","+")
-        url=f'https://openlibrary.org/search.json?q={param}'
+        url=f'{url_api}search.json?q={param}'
         with urlopen(url) as response:
             if(response.status==200):
                 body = response.read()

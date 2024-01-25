@@ -3,18 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://unpkg.com/htmx.org@1.7.0/dist/htmx.js"></script>
     <title>Adivina-Libros</title>
+    <!-- No funciona. Usar este cuando funcione -->
+    <!--<script src="/htmx/htmx.min.js"></script>-->
+    <script src="https://unpkg.com/htmx.org@1.7.0/dist/htmx.js"></script>
 </head>
 <body>
     <h3>Adivina el libro</h3>
-    <div>
-        <button hx-get="/daily-sentence" hx-target="#game">
+    <div id="newgame">
+        <button id="newgame-button" hx-get="/daily-sentence" hx-target="#game">
             Nueva partida
         </button>
     </div>
-    <div id="game">
-
-    </div>
+    <div id="game"></div>
 </body>
 </html>
