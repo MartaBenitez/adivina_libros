@@ -1,11 +1,11 @@
+import datetime
 from typing import List
 import json
-import random
 import os
 from urllib.request import urlopen
 
+from domain.book_info import BookInfo
 from domain.book_titles import BookTitles
-from domain.daily_sentence import DailySentence
 
 url_api=os.environ.get("URL_OPENLIBRARY_API")
 
@@ -14,17 +14,14 @@ class InMemorySentencesRepository():
         self.titles=self.get_titles()
         self.title=""
 
-    def get_sentence(self) -> DailySentence:
+    def get_sentence(self) -> BookInfo:
         disponibles = self.get_titles_available()
-        encontrado=False
         lista_titulos = disponibles.copy()
-        while encontrado is False:
-            if len(lista_titulos)==0:
-                raise FileNotFoundError("No se ha encontrado una frase")
-            index = random.choice(range(len(lista_titulos)))
-            titulo = lista_titulos[index]
-            lista_titulos.pop(index)
-            info, encontrado=self.get_book_info(titulo)
+        hoy = datetime.datetime.now()
+        indice = (hoy.year + hoy.month + hoy.day) % len(lista_titulos)
+        titulo = lista_titulos[indice]
+        # Escribir titulo en el fichero como usado
+        info=self.get_book_info(titulo)
         self.title=titulo
         return info
     
@@ -47,25 +44,46 @@ class InMemorySentencesRepository():
     def get_titles_available(self) -> List[str]:
         return self.titles.available
     
-    def get_book_info(self, title):
-        param=title.replace(" ","+")
-        url=f'{url_api}search.json?q={param}'
+    def get_book_info(self, titulo):
+        param=titulo.replace(" ","+")
+        url=f'{url_api}search.json?title={param}'
         with urlopen(url) as response:
             if(response.status==200):
                 body = response.read()
                 datos_json = json.loads(body)
                 if "docs" not in datos_json:
-                    return [None,False]
+                    return None
                 libro = datos_json["docs"][0]
-                if "first_sentence" not in libro:
-                    return [None,False]
-                frase=libro["first_sentence"][0]
-                if "author_name" not in libro:
-                    return [None,False]
-                autor=libro["author_name"][0]
-                daily_sentence=DailySentence(sentence=frase,title=title,author=autor)     
-                return [daily_sentence,True]
-            elif(response.status==404):
-                return [None,False]
+                frase = self.get_first_sentence(libro)
+                autor = self.get_author(libro)
+                lugar = self.get_place(libro)
+                personaje = self.get_character(libro)
+                anho = self.get_publish_year(libro)
+                daily_sentence=BookInfo(sentence=frase,title=titulo,author=autor,publish_year=anho,character=personaje,place=lugar)
+                return daily_sentence
             else:
                  raise ConnectionError("Error en la peticion")
+    def get_first_sentence(self,libro) -> str:
+        if "first_sentence" not in libro:
+            return ""
+        return libro["first_sentence"][0]
+            
+    def get_author(self,libro) -> str:
+        if "author_name" not in libro:
+            return ""
+        return libro["author_name"][0]
+    
+    def get_place(self,libro) -> str:
+        if "place" not in libro:
+            return ""
+        return libro["place"][0]
+        
+    def get_character(self, libro) -> str:
+        if "person" not in libro:
+            return ""
+        return libro["person"][0]
+    
+    def get_publish_year(self, libro) -> int:
+        if "first_publish_year" not in libro:
+            return 0
+        return int(libro["first_publish_year"])
