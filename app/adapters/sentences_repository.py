@@ -4,6 +4,7 @@ import json
 import os
 from urllib.request import urlopen
 
+from domain.cookie_data import CookieData
 from domain.book_info import BookInfo
 from domain.book_titles import BookTitles
 
@@ -26,6 +27,7 @@ class InMemorySentencesRepository():
         return info
     
     def check_response(self,rsp) -> bool:
+
         if(self.title == rsp.lower()):
             return True
         return False
@@ -87,3 +89,43 @@ class InMemorySentencesRepository():
         if "first_publish_year" not in libro:
             return 0
         return int(libro["first_publish_year"])
+    
+    def check_cookie(self, request) -> bool:
+        if 'adivina_libros' in request.cookies:
+            return True
+        return False
+
+    def update_cookie_correct(self, request) -> str:
+        if self.check_cookie(request):
+            cookie=request.cookies["adivina_libros"]
+            obj_cookie=CookieData.get_object_from_string(cookie)
+            obj_cookie.played+=1
+            obj_cookie.today_game=True
+            obj_cookie.games_win+=1
+            obj_cookie.try_number=1
+            return str(obj_cookie)
+        else:
+            return self.generate_cookie()
+
+    def update_cookie_incorrect(self, request) -> str:
+        if self.check_cookie(request):
+            cookie=request.cookies["adivina_libros"]
+            obj_cookie=CookieData.get_object_from_string(cookie)
+            obj_cookie.try_number+=1
+            if obj_cookie.try_number>5:
+                obj_cookie.today_game=True
+                obj_cookie.played+=1
+                obj_cookie.try_number=1
+            return str(obj_cookie)
+        else:
+            return self.generate_cookie()
+
+                
+    def generate_cookie(self) -> str:
+        obj_cookie=CookieData(today_game=False,try_number=1,played=0,games_win=0)
+        return str(obj_cookie)
+
+
+    
+
+

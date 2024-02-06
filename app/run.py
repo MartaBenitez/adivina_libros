@@ -19,19 +19,31 @@ def init(request: Request):
         "request": request,
         "sentence": respuesta.sentence
     }
-    return templates.TemplateResponse("index.html", context)
+    response = templates.TemplateResponse("index.html", context)
+    if repository.check_cookie(request) is False:
+        response.set_cookie(key="adivina_libros", value=repository.generate_cookie())
+    return response
 
 @app.post("/user-response", response_class=HTMLResponse)
 def response(request: Request, response: str = Form(...)):
     resultado_bool=repository.check_response(response)
-    mensaje="Incorrecto"
+
+    mensaje="Incorrecto"   
     if resultado_bool:
         mensaje="Correcto"
+        
     context = {
         "request": request,
         "result": mensaje
     }
-    return templates.TemplateResponse("result.html", context)
+
+    resp = templates.TemplateResponse("result.html", context)
+    if resultado_bool:
+        resp.set_cookie(key="adivina_libros", value=repository.update_cookie_correct(request))
+    else:
+        resp.set_cookie(key="adivina_libros", value=repository.update_cookie_incorrect(request))
+
+    return resp
 
 @app.post("/search-title", response_class=HTMLResponse)
 def search(request: Request, response: str = Form(...)):

@@ -51,7 +51,14 @@ Juego para adivinar un libro en función de la primera frase del mismo.
         ]
     }
     ```
-
+5. Fichero `settings.json` para debug
+    ```bash
+    {
+        "python.analysis.extraPaths": [
+            "./app"
+        ]
+    } 
+    ```
 
 
 ## Cómo jugar
