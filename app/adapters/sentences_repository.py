@@ -4,39 +4,16 @@ import json
 import os
 from urllib.request import urlopen
 
-from domain.cookie_data import CookieData
 from domain.book_info import BookInfo
 from domain.book_titles import BookTitles
 
 url_api=os.environ.get("URL_OPENLIBRARY_API")
-
 class InMemorySentencesRepository():
     def __init__(self):
         self.titles=self.get_titles()
         self.title=""
+        self.book_info=None
 
-    def get_sentence(self) -> BookInfo:
-        disponibles = self.get_titles_available()
-        lista_titulos = disponibles.copy()
-        hoy = datetime.datetime.now()
-        indice = (hoy.year + hoy.month + hoy.day) % len(lista_titulos)
-        titulo = lista_titulos[indice]
-        # Escribir titulo en el fichero como usado
-        info=self.get_book_info(titulo)
-        self.title=titulo
-        return info
-    
-    def check_response(self,rsp) -> bool:
-
-        if(self.title == rsp.lower()):
-            return True
-        return False
-
-    def search_title(self,rsp) -> List[str]:
-        titulos = self.get_titles_available()
-        respuesta=rsp.lower()
-        return list(filter(lambda title: respuesta in title,titulos))
-        
     def get_titles(self) -> BookTitles:
         with open("app/data/book_titles.json", 'r') as file:
             datos_json = json.load(file)
@@ -45,6 +22,34 @@ class InMemorySentencesRepository():
     
     def get_titles_available(self) -> List[str]:
         return self.titles.available
+
+    def set_title(self, title):
+        self.title=title
+
+    def set_book_info(self, info):
+        self.book_info=info
+    
+    def get_sentence(self) -> BookInfo:
+        disponibles = self.get_titles_available()
+        lista_titulos = disponibles.copy()
+        hoy = datetime.datetime.now()
+        indice = (hoy.year + hoy.month + hoy.day) % len(lista_titulos)
+        titulo = lista_titulos[indice]
+        # Escribir titulo en el fichero como usado
+        info=self.get_book_info(titulo)
+        self.set_title(titulo)
+        self.set_book_info(info)
+        return info
+    
+    def check_response(self,rsp) -> bool:
+        if(self.title == rsp.lower()):
+            return True
+        return False
+
+    def search_title(self,rsp) -> List[str]:
+        titulos = self.get_titles_available()
+        respuesta=rsp.lower()
+        return list(filter(lambda title: respuesta in title,titulos))
     
     def get_book_info(self, titulo):
         param=titulo.replace(" ","+")
@@ -62,6 +67,7 @@ class InMemorySentencesRepository():
                 personaje = self.get_character(libro)
                 anho = self.get_publish_year(libro)
                 daily_sentence=BookInfo(sentence=frase,title=titulo,author=autor,publish_year=anho,character=personaje,place=lugar)
+                
                 return daily_sentence
             else:
                  raise ConnectionError("Error en la peticion")
@@ -89,43 +95,3 @@ class InMemorySentencesRepository():
         if "first_publish_year" not in libro:
             return 0
         return int(libro["first_publish_year"])
-    
-    def check_cookie(self, request) -> bool:
-        if 'adivina_libros' in request.cookies:
-            return True
-        return False
-
-    def update_cookie_correct(self, request) -> str:
-        if self.check_cookie(request):
-            cookie=request.cookies["adivina_libros"]
-            obj_cookie=CookieData.get_object_from_string(cookie)
-            obj_cookie.played+=1
-            obj_cookie.today_game=True
-            obj_cookie.games_win+=1
-            obj_cookie.try_number=1
-            return str(obj_cookie)
-        else:
-            return self.generate_cookie()
-
-    def update_cookie_incorrect(self, request) -> str:
-        if self.check_cookie(request):
-            cookie=request.cookies["adivina_libros"]
-            obj_cookie=CookieData.get_object_from_string(cookie)
-            obj_cookie.try_number+=1
-            if obj_cookie.try_number>5:
-                obj_cookie.today_game=True
-                obj_cookie.played+=1
-                obj_cookie.try_number=1
-            return str(obj_cookie)
-        else:
-            return self.generate_cookie()
-
-                
-    def generate_cookie(self) -> str:
-        obj_cookie=CookieData(today_game=False,try_number=1,played=0,games_win=0)
-        return str(obj_cookie)
-
-
-    
-
-

@@ -19,8 +19,9 @@ Juego para adivinar un libro en función de la primera frase del mismo.
 1. Crear entorno virtual `.venv`
 
 2. Variables de entorno
-    
+
     Fichero `.env`:
+
     ```bash
     URL_OPENLIBRARY_API=https://openlibrary.org/
     ```
@@ -36,6 +37,7 @@ Juego para adivinar un libro en función de la primera frase del mismo.
     ```
 
 4. Fichero `launch.json` para debug
+
     ```bash
     {
         "version": "0.2.0",
@@ -51,7 +53,9 @@ Juego para adivinar un libro en función de la primera frase del mismo.
         ]
     }
     ```
+
 5. Fichero `settings.json` para debug
+
     ```bash
     {
         "python.analysis.extraPaths": [
@@ -60,13 +64,9 @@ Juego para adivinar un libro en función de la primera frase del mismo.
     } 
     ```
 
-
 ## Cómo jugar
-
-
 
 [python]: https://www.python.org/
 [htmx]: https://htmx.org/
 [fastapi]: https://fastapi.tiangolo.com/
 [uvicorn]: https://www.uvicorn.org/
-
