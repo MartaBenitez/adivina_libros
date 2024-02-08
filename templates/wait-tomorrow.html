@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adivina-Libros</title>
+    <!-- No funciona. Usar este cuando funcione -->
+    <!--<script src="/htmx/htmx.min.js"></script>-->
+    <script src="https://unpkg.com/htmx.org@1.7.0/dist/htmx.js"></script>
+</head>
+<body>
+    <h3>Adivina el libro</h3>
+        <div>
+            {% if last_try %}
+                <h3>Este ha sido tu último intento. No puedes volver a jugar hasta mañana</h3>
+            {% else %}
+                <h3>Ya has jugado hoy. Espera hasta mañana</h3>
+            {% endif %}
+        </div>
+    </div>
+    <div id="game"></div>
+</body>
+</html>

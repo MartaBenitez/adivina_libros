@@ -24,10 +24,23 @@ def init(request: Request):
     response = templates.TemplateResponse("index.html", context)
     if cookiesRepo.check_cookie(request) is False:
         response.set_cookie(key="adivina_libros", value=cookiesRepo.generate_cookie(), httponly=True)
+    else:
+        if(cookiesRepo.check_today_done(request)):
+            response = templates.TemplateResponse("wait-tomorrow.html", context)
     return response
 
 @app.post("/user-response", response_class=HTMLResponse)
 def response(request: Request, response: str = Form(...)):
+
+    if(cookiesRepo.check_cookie(request) and cookiesRepo.check_try_number(request) is False):
+        context = {
+            "request": request,
+            "last_try": True
+        }
+        resp = templates.TemplateResponse("wait-tomorrow.html", context)
+        resp.set_cookie(key="adivina_libros", value=cookiesRepo.update_cookie_try_number(request), httponly=True)
+        return resp
+
     resultado_bool=repository.check_response(response)
 
     mensaje="Incorrecto"   
